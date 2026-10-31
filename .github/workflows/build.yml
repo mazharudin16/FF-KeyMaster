@@ -13,8 +13,14 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.7"
-      - run: gradle assembleDebug --no-daemon
+      - name: Build
+        shell: bash
         working-directory: FFKeyMaster
+        run: gradle assembleDebug --no-daemon --console=plain 2>&1 | tee build.log
+      - name: Show errors
+        if: failure()
+        working-directory: FFKeyMaster
+        run: grep -E "^e: " build.log | sed 's#file:///.*/com/ffkeymaster/app/##' || true
       - uses: actions/upload-artifact@v4
         with:
           name: FFKeyMaster-apk
